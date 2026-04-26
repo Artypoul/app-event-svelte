@@ -1,6 +1,9 @@
 <script>
 	import { onMount } from 'svelte';
 
+	const heroBackground =
+		'https://images.unsplash.com/photo-1505236858219-8359eb29e329?q=80&w=2200&auto=format&fit=crop';
+
 	const protocols = [
 		{
 			number: '01',
@@ -31,14 +34,28 @@
 		{
 			title: 'Корпоративные события',
 			description: 'Стратегические сессии и закрытые форумы для топ-менеджмента.',
+			image:
+				'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=1600&auto=format&fit=crop',
 			wide: true
 		},
-		{ title: 'Частные', description: 'Юбилеи и ужины вне чужих глаз.' },
-		{ title: 'VIP & Protocol', description: 'Встречи первых лиц и делегаций с соблюдением протокола.' },
+		{
+			title: 'Частные',
+			description: 'Юбилеи и ужины вне чужих глаз.',
+			image:
+				'https://images.unsplash.com/photo-1527529482837-4698179dc6ce?q=80&w=1200&auto=format&fit=crop'
+		},
+		{
+			title: 'VIP & Protocol',
+			description: 'Встречи первых лиц и делегаций с соблюдением протокола.',
+			image:
+				'https://images.unsplash.com/photo-1531058020387-3be344556be6?q=80&w=1200&auto=format&fit=crop'
+		},
 		{
 			title: 'Архитектура "Под ключ"',
 			description:
 				'Полный цикл: от разработки концепции до технического продакшена (High-end звук и свет).',
+			image:
+				'https://images.unsplash.com/photo-1470229538611-16ba8c7ffbd7?q=80&w=1600&auto=format&fit=crop',
 			wide: true
 		}
 	];
@@ -47,19 +64,25 @@
 		{
 			id: 'Case #042 • Swiss Alps',
 			title: 'Private Summit',
-			description: '3 дня. 40 гостей. Абсолютная изоляция. Сложная застройка в горной местности.'
+			description: '3 дня. 40 гостей. Абсолютная изоляция. Сложная застройка в горной местности.',
+			image:
+				'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1800&auto=format&fit=crop'
 		},
 		{
 			id: 'Case #089 • Dubai',
 			title: 'Corporate Board',
 			description:
-				'Презентация стратегии для совета директоров. Технический продакшн высочайшего уровня.'
+				'Презентация стратегии для совета директоров. Технический продакшн высочайшего уровня.',
+			image:
+				'https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=1800&auto=format&fit=crop'
 		},
 		{
 			id: 'Case #112 • Moscow',
 			title: 'Closed Gala',
 			description:
-				'Событие для списка Forbes. Жесткий регламент доступа и запрет на мобильные устройства.'
+				'Событие для списка Forbes. Жесткий регламент доступа и запрет на мобильные устройства.',
+			image:
+				'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?q=80&w=1800&auto=format&fit=crop'
 		}
 	];
 
@@ -160,6 +183,8 @@
 	</nav>
 
 	<section class="hero section">
+		<img src={heroBackground} alt="Premium event" class="hero-bg" />
+		<div class="hero-mask"></div>
 		<div class="hero-content">
 			<h1 class="hero-title reveal active">Закрытые мероприятия <br /><span>без огласки</span></h1>
 			<p class="hero-text reveal active">
@@ -191,8 +216,12 @@
 		<div class="formats-grid">
 			{#each formats as item, idx}
 				<article class={`panel format-card reveal ${item.wide ? 'wide' : ''}`} style={`transition-delay:${idx * 0.1}s`}>
-					<h3>{item.title}</h3>
-					<p>{item.description}</p>
+					<img src={item.image} alt={item.title} class="card-image" />
+					<div class="card-mask"></div>
+					<div class="card-content">
+						<h3>{item.title}</h3>
+						<p>{item.description}</p>
+					</div>
 				</article>
 			{/each}
 		</div>
@@ -206,6 +235,7 @@
 		<div class="archive-track">
 			{#each archives as item}
 				<article class="panel archive-card">
+					<img src={item.image} alt={item.title} class="archive-image" />
 					<div class="archive-overlay"></div>
 					<div class="archive-content">
 						<p>{item.id}</p>
@@ -416,11 +446,30 @@
 		display: grid;
 		place-items: center;
 		padding-inline: 24px;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.hero-bg {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		filter: brightness(0.28) grayscale(25%);
+	}
+
+	.hero-mask {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(180deg, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.88));
 	}
 
 	.hero-content {
 		max-width: 980px;
 		text-align: center;
+		position: relative;
+		z-index: 1;
 	}
 
 	.hero-title {
@@ -556,6 +605,36 @@
 		display: flex;
 		flex-direction: column;
 		justify-content: flex-end;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.card-image,
+	.archive-image {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		filter: grayscale(30%) brightness(0.52);
+		transition: transform 0.7s ease, filter 0.7s ease;
+	}
+
+	.format-card:hover .card-image,
+	.archive-card:hover .archive-image {
+		transform: scale(1.05);
+		filter: grayscale(10%) brightness(0.7);
+	}
+
+	.card-mask {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(180deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.82));
+	}
+
+	.card-content {
+		position: relative;
+		z-index: 1;
 	}
 
 	.format-card.wide {
