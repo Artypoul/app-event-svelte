@@ -1,673 +1,267 @@
 <script>
-	import { onMount } from 'svelte';
+  import { onMount } from 'svelte';
 
-	const protocols = [
-		{
-			id: '01',
-			title: 'Immediate NDA',
-			description:
-				'Соглашение о неразглашении подписывается до первой встречи. Ваши данные защищены мгновенно.'
-		},
-		{
-			id: '02',
-			title: 'Signal Blocker',
-			description:
-				'Техническое отключение камер, блокировка сигналов и изъятие устройств по запросу клиента.'
-		},
-		{
-			id: '03',
-			title: 'Vetted Staff',
-			description:
-				'Персонал проходит многоуровневую проверку безопасности и жесткий инструктаж.'
-		},
-		{
-			id: '04',
-			title: 'Zero Trace',
-			description:
-				'Полное удаление цифрового следа события: отсутствие геолокации, фотоотчетов и упоминаний.'
-		}
-	];
+  let navbar;
+  let navInner;
+  let mobileMenu;
+  let mobileToggle;
+  let menuOpen = false;
+  let navbarHeight = 80;
 
-	const expertise = [
-		{
-			title: 'Corporate Worlds',
-			description: 'Стратегические сессии и закрытые форумы для тех, кто управляет рынками.',
-			image:
-				'https://images.unsplash.com/photo-1582213726895-3b03697e88d8?q=80&w=1000&auto=format&fit=crop'
-		},
-		{
-			title: 'Private Realms',
-			description: 'Юбилеи и ужины в кругу доверенных лиц, скрытые от посторонних глаз.',
-			image:
-				'https://images.unsplash.com/photo-1549416878-b9ca95e26903?q=80&w=1000&auto=format&fit=crop'
-		},
-		{
-			title: 'High-End Production',
-			description: 'Собственный парк оборудования. Звук и свет уровня мировых звезд.',
-			image:
-				'https://images.unsplash.com/photo-1598463349603-99b38f8303f5?q=80&w=1000&auto=format&fit=crop',
-			highlight: true
-		}
-	];
+  let contactForm;
+  let formSuccess;
+  let submitBtn;
+  let btnText;
+  let btnLoading;
 
-	const counters = [
-		{ value: 70, label: 'Events', gold: true },
-		{ value: 8, label: 'Years' },
-		{ value: 100, label: 'NDA Strict' },
-		{ value: 90, label: 'Returning' }
-	];
+  const mobileLinks = [
+    { href: '#confidentiality', title: 'Конфиденциальность' },
+    { href: '#formats', title: 'Форматы' },
+    { href: '#cases', title: 'Кейсы' },
+    { href: '#faq', title: 'FAQ' }
+  ];
 
-	onMount(() => {
-		const cursor = document.getElementById('cursor');
-		const hoverTargets = document.querySelectorAll('.hover-target, a, button, summary');
-		const revealElements = document.querySelectorAll('.reveal');
-		const counterElements = document.querySelectorAll('.counter');
+  const formatCards = [
+    ['Корпоративные события', 'Закрытые встречи акционеров, стратегические сессии, юбилеи компаний.', 'https://image.qwenlm.ai/public_source/66673185-31fc-400c-9758-01d949190730/173402889-7605-45bb-84b9-6a7f27beb1fc.png'],
+    ['Частные мероприятия', 'Свадьбы, дни рождения, семейные торжества в узком кругу.', 'https://image.qwenlm.ai/public_source/66673185-31fc-400c-9758-01d949190730/19ff57788-fc26-44ea-9dfb-2b5c41a5268b.png'],
+    ['VIP / Closed Events', 'Вечеринки для избранных, концерты private gig, закрытые показы.', 'https://image.qwenlm.ai/public_source/66673185-31fc-400c-9758-01d949190730/1032f2de6-7c8d-4e15-af56-47e8795cde9a.png'],
+    ['Под ключ', 'Полная организация логистики, охраны и контента без вашего участия.', 'https://image.qwenlm.ai/public_source/66673185-31fc-400c-9758-01d949190730/1a0a26d6f-d974-45c8-a93c-363ba110453d.png']
+  ];
 
-		const onMove = (event) => {
-			if (!cursor) return;
-			cursor.style.left = `${event.clientX}px`;
-			cursor.style.top = `${event.clientY}px`;
-		};
+  function scrollToContact() {
+    const contactSection = document.getElementById('contact');
+    const offset = navbarHeight + 20;
+    const elementPosition = contactSection.getBoundingClientRect().top;
+    window.scrollTo({ top: elementPosition + window.pageYOffset - offset, behavior: 'smooth' });
+  }
 
-		document.addEventListener('mousemove', onMove);
+  function openMobileMenu() {
+    menuOpen = true;
+    document.body.style.overflow = 'hidden';
+  }
 
-		hoverTargets.forEach((target) => {
-			target.addEventListener('mouseenter', () => cursor?.classList.add('cursor-hover'));
-			target.addEventListener('mouseleave', () => cursor?.classList.remove('cursor-hover'));
-		});
+  function closeMobileMenu() {
+    menuOpen = false;
+    document.body.style.overflow = '';
+  }
 
-		const revealObserver = new IntersectionObserver(
-			(entries) => {
-				entries.forEach((entry) => {
-					if (entry.isIntersecting) entry.target.classList.add('active');
-				});
-			},
-			{ threshold: 0.15, rootMargin: '0px 0px -50px 0px' }
-		);
+  onMount(() => {
+    const lucideReady = () => window.lucide?.createIcons();
+    lucideReady();
 
-		revealElements.forEach((el) => revealObserver.observe(el));
+    const handleNavScroll = () => {
+      const currentScroll = window.pageYOffset;
+      if (currentScroll > 60) {
+        navbar.classList.add('bg-dark-nav');
+        navInner.classList.remove('h-20');
+        navInner.classList.add('h-16');
+        navbarHeight = 64;
+      } else {
+        navbar.classList.remove('bg-dark-nav');
+        navInner.classList.add('h-20');
+        navInner.classList.remove('h-16');
+        navbarHeight = 80;
+      }
+    };
 
-		const counterObserver = new IntersectionObserver(
-			(entries, observer) => {
-				entries.forEach((entry) => {
-					if (!entry.isIntersecting) return;
-					const node = entry.target;
-					const end = Number(node.getAttribute('data-target') || 0);
-					let current = 0;
-					const duration = 2500;
-					const increment = end / (duration / 16);
+    window.addEventListener('scroll', handleNavScroll, { passive: true });
 
-					const tick = () => {
-						current += increment;
-						if (current < end) {
-							node.textContent = String(Math.ceil(current));
-							requestAnimationFrame(tick);
-						} else {
-							node.textContent = `${end}+`;
-						}
-					};
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { rootMargin: '0px 0px -60px 0px', threshold: 0.1 });
 
-					tick();
-					observer.unobserve(node);
-				});
-			},
-			{ threshold: 0.7 }
-		);
+    document.querySelectorAll('.reveal').forEach((el) => revealObserver.observe(el));
 
-		counterElements.forEach((el) => counterObserver.observe(el));
+    const counterObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const counter = entry.target;
+        const target = parseInt(counter.dataset.target);
+        const suffix = counter.dataset.suffix || '';
+        const duration = 2000;
+        const startTime = performance.now();
 
-		return () => {
-			document.removeEventListener('mousemove', onMove);
-			revealObserver.disconnect();
-			counterObserver.disconnect();
-		};
-	});
+        const updateCounter = (currentTime) => {
+          const progress = Math.min((currentTime - startTime) / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          counter.textContent = Math.round(eased * target) + suffix;
+          if (progress < 1) requestAnimationFrame(updateCounter);
+        };
+
+        requestAnimationFrame(updateCounter);
+        counterObserver.unobserve(counter);
+      });
+    }, { threshold: 0.5 });
+
+    document.querySelectorAll('.counter-value[data-target]').forEach((el) => counterObserver.observe(el));
+
+    const heroImage = document.querySelector('.hero-image');
+    const onHeroScroll = () => {
+      if (heroImage && window.pageYOffset < window.innerHeight) {
+        heroImage.style.transform = `scale(1.1) translateY(${window.pageYOffset * 0.3}px)`;
+      }
+    };
+    window.addEventListener('scroll', onHeroScroll, { passive: true });
+
+    const onEsc = (e) => e.key === 'Escape' && menuOpen && closeMobileMenu();
+    document.addEventListener('keydown', onEsc);
+
+    const onSubmit = async (e) => {
+      e.preventDefault();
+      document.querySelectorAll('.error-message').forEach((msg) => msg.classList.add('hidden'));
+      document.querySelectorAll('.form-input').forEach((input) => input.classList.remove('border-red-400'));
+
+      const nameInput = document.getElementById('name');
+      const contactInput = document.getElementById('contact-info');
+      let isValid = true;
+
+      if (!nameInput.value.trim()) {
+        nameInput.classList.add('border-red-400');
+        nameInput.parentElement.querySelector('.error-message').classList.remove('hidden');
+        isValid = false;
+      }
+      if (!contactInput.value.trim()) {
+        contactInput.classList.add('border-red-400');
+        contactInput.parentElement.querySelector('.error-message').classList.remove('hidden');
+        isValid = false;
+      }
+      if (!isValid) return;
+
+      submitBtn.disabled = true;
+      btnText.classList.add('hidden');
+      btnLoading.classList.remove('hidden');
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      contactForm.classList.add('hidden');
+      formSuccess.classList.remove('hidden');
+      lucideReady();
+
+      setTimeout(() => {
+        contactForm.classList.remove('hidden');
+        formSuccess.classList.add('hidden');
+        contactForm.reset();
+        submitBtn.disabled = false;
+        btnText.classList.remove('hidden');
+        btnLoading.classList.add('hidden');
+      }, 5000);
+    };
+
+    contactForm.addEventListener('submit', onSubmit);
+
+    document.querySelectorAll('.form-input').forEach((input) => {
+      input.addEventListener('input', () => {
+        input.classList.remove('border-red-400');
+        input.parentElement.querySelector('.error-message')?.classList.add('hidden');
+      });
+    });
+
+    return () => {
+      window.removeEventListener('scroll', handleNavScroll);
+      window.removeEventListener('scroll', onHeroScroll);
+      document.removeEventListener('keydown', onEsc);
+      revealObserver.disconnect();
+      counterObserver.disconnect();
+      contactForm?.removeEventListener('submit', onSubmit);
+    };
+  });
 </script>
 
-<div class="page noise">
-	<div id="cursor"></div>
+<svelte:head>
+  <title>Closed Events | Закрытые мероприятия</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/cormorant-garamond@5.0.8/300.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/cormorant-garamond@5.0.8/400.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/cormorant-garamond@5.0.8/600.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/cormorant-garamond@5.0.8/400-italic.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope@5.0.20/200.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope@5.0.20/300.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope@5.0.20/400.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope@5.0.20/500.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</svelte:head>
 
-	<nav class="top-nav">
-		<div class="logo">Planeta</div>
-		<a href="#contact" class="hover-target nav-link">Initiate Protocol</a>
-	</nav>
+<a href="#main-content" class="sr-only focus-link">Перейти к основному контенту</a>
 
-	<section class="hero">
-		<img
-			src="https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=2560&auto=format&fit=crop"
-			alt="Hero Background"
-			class="hero-bg"
-		/>
-		<div class="hero-overlay"></div>
-		<div class="hero-content">
-			<h1 class="reveal-text">
-				Closed Events <br /><span>Without a Trace</span>
-			</h1>
-			<p class="hero-subtitle reveal">Absolute discretion for private and corporate gatherings.</p>
-			<div class="hero-actions reveal">
-				<a href="#contact" class="btn btn-light hover-target">Обсудить</a>
-				<a href="#faq" class="btn btn-outline hover-target">Запросить NDA</a>
-			</div>
-		</div>
-	</section>
+<nav id="navbar" bind:this={navbar} class="fixed w-full z-50 top-0 transition-all duration-400 ease-out" aria-label="Основная навигация">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div id="nav-inner" bind:this={navInner} class="flex items-center justify-between h-20 transition-all duration-400">
+      <a href="#main-content" class="relative z-50 text-xl sm:text-2xl font-serif font-semibold tracking-[0.2em] text-white uppercase flex-shrink-0">Closed<span class="text-gold">.</span>Events</a>
+      <div class="hidden lg:flex items-center space-x-10">
+        {#each mobileLinks as link}
+          <a href={link.href} class="text-xs uppercase tracking-[0.2em] text-gray-400 hover:text-gold transition-colors duration-300 relative group">{link.title}<span class="absolute -bottom-1 left-0 w-0 h-px bg-gold transition-all duration-300 group-hover:w-full"></span></a>
+        {/each}
+      </div>
+      <div class="hidden lg:block"><button on:click={scrollToContact} class="border border-white/20 px-7 py-2.5 text-[11px] uppercase tracking-[0.2em] text-white hover:bg-gold hover:border-gold hover:text-black transition-all duration-300">Обсудить проект</button></div>
+      <button bind:this={mobileToggle} class="lg:hidden relative z-50 w-10 h-10 flex items-center justify-center" aria-label={menuOpen ? 'Закрыть меню' : 'Открыть меню'} aria-expanded={menuOpen} on:click={() => (menuOpen ? closeMobileMenu() : openMobileMenu())}>
+        <div class="flex flex-col items-center justify-center w-6 h-5 relative">
+          <span class="nav-line absolute w-full h-px bg-white" class:line-1-open={menuOpen} style="top:0"></span>
+          <span class="nav-line absolute w-full h-px bg-white" class:line-2-open={menuOpen} style="top:50%;transform:translateY(-50%)"></span>
+          <span class="nav-line absolute w-full h-px bg-white" class:line-3-open={menuOpen} style="bottom:0"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+  <div id="mobile-menu" bind:this={mobileMenu} class="mobile-menu fixed inset-0 z-40 bg-dark/98 backdrop-blur-xl lg:hidden" class:open={menuOpen}>
+    <div class="flex flex-col items-center justify-center h-full space-y-8">
+      {#each mobileLinks as link}
+        <a href={link.href} class="text-2xl font-serif text-white hover:text-gold" on:click={closeMobileMenu}>{link.title}</a>
+      {/each}
+      <div class="pt-8"><button on:click={() => { closeMobileMenu(); scrollToContact(); }} class="bg-gold text-black px-10 py-3 text-sm uppercase tracking-[0.2em] font-medium">Обсудить проект</button></div>
+    </div>
+  </div>
+</nav>
 
-	<section class="protocols">
-		<div class="protocol-grid">
-			{#each protocols as item, idx}
-				<article class="protocol-card glow-border reveal" style={`transition-delay:${idx * 0.1}s`}>
-					<h3>Protocol {item.id}</h3>
-					<h4>{item.title}</h4>
-					<p>{item.description}</p>
-				</article>
-			{/each}
-		</div>
-	</section>
+<main id="main-content" class="font-sans antialiased bg-dark text-gray-200">
+  <header class="relative h-screen min-h-[700px] flex items-center justify-center overflow-hidden">
+    <div class="absolute inset-0 z-0"><img src="https://image.qwenlm.ai/public_source/66673185-31fc-400c-9758-01d949190730/1ff567042-2eec-40d7-b49c-a8504b6a957a.png" alt="hero" class="hero-image w-full h-full object-cover scale-110 transition-transform duration-[3s] ease-out" /><div class="absolute inset-0 bg-gradient-to-b from-dark/70 via-dark/40 to-dark"></div></div>
+    <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 text-center reveal">
+      <p class="text-gold uppercase tracking-[0.35em] text-xs mb-8 font-medium">Private & Confidential</p>
+      <h1 class="font-serif text-[2.5rem] sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl leading-[1.05] mb-8 text-white">Закрытые мероприятия <span class="block italic text-gray-300/80 text-[2rem] sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl mt-3">без огласки</span></h1>
+      <p class="text-gray-400 text-base sm:text-lg md:text-xl max-w-2xl mx-auto mb-12 font-light leading-relaxed">Организация событий премиум-класса, где ваша приватность является главным активом.</p>
+      <div class="flex flex-col sm:flex-row gap-4 sm:gap-5 justify-center items-center"><button on:click={scrollToContact} class="w-full sm:w-auto bg-gold text-black px-10 py-4 uppercase tracking-[0.2em] text-xs sm:text-sm font-medium">Обсудить мероприятие</button><button class="w-full sm:w-auto border border-white/25 text-white px-10 py-4 uppercase tracking-[0.2em] text-xs sm:text-sm font-medium flex items-center justify-center gap-2.5"><i data-lucide="lock" class="w-3.5 h-3.5"></i>Запросить NDA</button></div>
+    </div>
+  </header>
 
-	<section class="expertise-section">
-		<h2 class="section-title reveal">Areas of Expertise</h2>
-		<div class="expertise-grid">
-			{#each expertise as item, idx}
-				<article class="expertise-card glow-border reveal" style={`transition-delay:${idx * 0.2}s`}>
-					<img src={item.image} alt={item.title} class="premium-img" />
-					<div class="card-overlay"></div>
-					<div class="card-content">
-						<h3 class:gold={item.highlight}>{item.title}</h3>
-						<p>{item.description}</p>
-					</div>
-				</article>
-			{/each}
-		</div>
-	</section>
+  <section id="formats" class="py-20 sm:py-24 lg:py-28 bg-dark">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12 sm:mb-16 reveal"><span class="text-gold uppercase tracking-[0.3em] text-xs font-medium">Экспертиза</span><h2 class="font-serif text-3xl sm:text-4xl md:text-5xl mt-4 text-white">Форматы мероприятий</h2></div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
+        {#each formatCards as card, i}
+          <div class="group relative h-[380px] sm:h-[420px] lg:h-[440px] overflow-hidden cursor-pointer reveal" style={`transition-delay:${i * 100}ms`}>
+            <img src={card[2]} alt={card[0]} class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/20"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-6 sm:p-8"><h3 class="font-serif text-xl sm:text-2xl text-white mb-2 group-hover:text-gold transition-colors duration-300">{card[0]}</h3><p class="text-gray-400 text-sm opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-3 group-hover:translate-y-0">{card[1]}</p></div>
+          </div>
+        {/each}
+      </div>
+    </div>
+  </section>
 
-	<section class="quote-section reveal">
-		<h2>Great Events <br /><span>Require Silence.</span></h2>
-	</section>
+  <section class="py-16 sm:py-20 bg-gold text-black"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 text-center"><div><div class="text-4xl font-serif font-bold mb-2 counter-value" data-target="50" data-suffix="+">0</div><div class="text-xs uppercase tracking-[0.2em] opacity-70">Мероприятий</div></div><div><div class="text-4xl font-serif font-bold mb-2 counter-value" data-target="7" data-suffix="+">0</div><div class="text-xs uppercase tracking-[0.2em] opacity-70">Лет опыта</div></div><div><div class="text-4xl font-serif font-bold mb-2">100%</div><div class="text-xs uppercase tracking-[0.2em] opacity-70">NDA проектов</div></div><div><div class="text-4xl font-serif font-bold mb-2 counter-value" data-target="20" data-suffix="+">0</div><div class="text-xs uppercase tracking-[0.2em] opacity-70">Городов</div></div><div class="col-span-2 sm:col-span-1"><div class="text-4xl font-serif font-bold mb-2 counter-value" data-target="85" data-suffix="%">0</div><div class="text-xs uppercase tracking-[0.2em] opacity-70">Повторных клиентов</div></div></div></div></section>
 
-	<section class="counter-section">
-		<div class="counter-grid">
-			{#each counters as item, idx}
-				<div class="counter-item reveal" style={`transition-delay:${idx * 0.1}s`}>
-					<div class={`counter font-sync ${item.gold ? 'gold' : ''}`} data-target={item.value}>0</div>
-					<div class="counter-label">{item.label}</div>
-				</div>
-			{/each}
-		</div>
-	</section>
+  <section id="faq" class="py-20 sm:py-24 lg:py-28 bg-charcoal border-t border-white/5"><div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8"><h2 class="font-serif text-3xl sm:text-4xl text-center text-white mb-10 sm:mb-14 reveal">Важное перед стартом</h2><div class="space-y-4 reveal"><details class="group bg-slate border border-white/5"><summary class="flex justify-between items-center font-medium cursor-pointer list-none p-6 text-white">Подписываете ли вы NDA?<i data-lucide="chevron-down" class="w-5 h-5 text-gold"></i></summary><div class="px-6 pb-6 text-sm text-gray-400 border-t border-white/5 pt-4">Да, это стандарт нашей работы.</div></details></div></div></section>
 
-	<section id="faq" class="faq-section reveal">
-		<h2 class="section-title">Operation Protocol</h2>
-		<details class="glow-border">
-			<summary class="hover-target">Do you provide Immediate NDA?<span>+</span></summary>
-			<div>Yes. Agreement is signed before the first detailed discussion.</div>
-		</details>
-		<details class="glow-border">
-			<summary class="hover-target">How is device usage managed?<span>+</span></summary>
-			<div>Camera stickers, secure storage lockers, and on-site monitoring.</div>
-		</details>
-	</section>
-
-	<section id="contact" class="contact-section">
-		<img
-			src="https://images.unsplash.com/photo-1599675308696-65103a8df45d?q=80&w=2000&auto=format&fit=crop"
-			alt="Contact"
-			class="contact-bg"
-		/>
-		<div class="contact-overlay"></div>
-		<div class="contact-content reveal">
-			<h2>Initiate <span>Dial</span></h2>
-			<p>Secure channel activation.</p>
-			<form class="contact-form" on:submit|preventDefault>
-				<input type="text" placeholder="Identity / Position" required />
-				<input type="text" placeholder="Secure Messenger (Telegram / Signal)" required />
-				<button class="btn btn-light hover-target" type="submit">Request Secure Call</button>
-			</form>
-		</div>
-	</section>
-</div>
+  <section id="contact" class="py-20 sm:py-24 lg:py-28 bg-dark relative"><div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8"><div class="glass-panel p-6 sm:p-8 md:p-12 reveal"><div class="text-center mb-8 sm:mb-10"><h2 class="font-serif text-3xl sm:text-4xl text-white mb-3 sm:mb-4">Обсудим ваше мероприятие</h2><p class="text-gray-400 text-sm sm:text-base">Оставьте заявку.</p></div><form bind:this={contactForm} id="contact-form" class="space-y-6" novalidate><div class="grid grid-cols-1 sm:grid-cols-2 gap-6"><div class="space-y-2"><label for="name" class="text-xs uppercase tracking-[0.2em] text-gray-500 font-medium">Имя <span class="text-gold">*</span></label><input type="text" id="name" required class="form-input w-full bg-black/40 border border-white/10 p-4 text-white text-sm" /><p class="error-message text-red-400 text-[11px] hidden">Введите ваше имя</p></div><div class="space-y-2"><label for="contact-info" class="text-xs uppercase tracking-[0.2em] text-gray-500 font-medium">Телефон / Telegram <span class="text-gold">*</span></label><input type="text" id="contact-info" required class="form-input w-full bg-black/40 border border-white/10 p-4 text-white text-sm" /><p class="error-message text-red-400 text-[11px] hidden">Укажите способ связи</p></div></div><button bind:this={submitBtn} type="submit" id="submit-btn" class="w-full bg-gold text-black font-medium uppercase tracking-[0.2em] text-sm py-4 flex items-center justify-center gap-2"><span bind:this={btnText} class="btn-text">Отправить запрос</span><span bind:this={btnLoading} class="btn-loading hidden"><svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle></svg></span></button></form><div bind:this={formSuccess} id="form-success" class="hidden text-center py-8"><i data-lucide="check-circle" class="w-8 h-8 text-gold mx-auto mb-4"></i><h3 class="font-serif text-2xl text-white mb-3">Заявка отправлена</h3></div></div></div></section>
+</main>
 
 <style>
-	@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;600&family=Syncopate:wght@400;700&display=swap');
-
-	:global(html) {
-		scroll-behavior: smooth;
-	}
-
-	:global(body) {
-		margin: 0;
-		font-family: Inter, sans-serif;
-		background: #000;
-		color: #fff;
-		overflow-x: hidden;
-		cursor: none;
-	}
-
-	.page {
-		--gold: #c5a059;
-		--border: rgba(255, 255, 255, 0.08);
-		position: relative;
-		background: #000;
-	}
-
-	.noise::before {
-		content: '';
-		position: fixed;
-		inset: 0;
-		background: url('https://grainy-gradients.vercel.app/noise.svg');
-		opacity: 0.04;
-		pointer-events: none;
-		z-index: 50;
-	}
-
-	#cursor {
-		width: 10px;
-		height: 10px;
-		background: #fff;
-		border-radius: 50%;
-		position: fixed;
-		pointer-events: none;
-		z-index: 9999;
-		mix-blend-mode: difference;
-		transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-		transform: translate(-50%, -50%);
-	}
-
-	.cursor-hover {
-		transform: translate(-50%, -50%) scale(6) !important;
-		background: rgba(255, 255, 255, 0.2) !important;
-	}
-
-	.top-nav {
-		position: fixed;
-		inset: 0 0 auto 0;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 24px 32px;
-		z-index: 60;
-		mix-blend-mode: difference;
-	}
-
-	.logo,
-	.font-sync {
-		font-family: Syncopate, sans-serif;
-	}
-
-	.logo {
-		font-size: 28px;
-		text-transform: uppercase;
-	}
-
-	.nav-link {
-		font-size: 11px;
-		letter-spacing: 0.3em;
-		text-transform: uppercase;
-		text-decoration: none;
-		color: #fff;
-		opacity: 0.75;
-	}
-
-	section {
-		position: relative;
-	}
-
-	.hero {
-		height: 100vh;
-		display: grid;
-		place-items: center;
-		text-align: center;
-		padding: 24px;
-		overflow: hidden;
-	}
-
-	.hero-bg,
-	.contact-bg {
-		position: absolute;
-		inset: 0;
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-	}
-
-	.hero-bg {
-		filter: brightness(0.2);
-	}
-
-	.hero-overlay,
-	.contact-overlay {
-		position: absolute;
-		inset: 0;
-		background: linear-gradient(180deg, #000 0%, transparent 45%, #000 100%);
-	}
-
-	.hero-content {
-		position: relative;
-		z-index: 1;
-		max-width: 980px;
-	}
-
-	h1 {
-		font-family: Syncopate, sans-serif;
-		font-size: clamp(40px, 7vw, 112px);
-		text-transform: uppercase;
-		line-height: 1.1;
-		margin: 0;
-	}
-
-	h1 span,
-	.quote-section span,
-	.contact-content h2 span,
-	.gold {
-		color: var(--gold);
-	}
-
-	.hero-subtitle {
-		margin: 24px auto 40px;
-		max-width: 620px;
-		font-size: 14px;
-		color: rgba(255, 255, 255, 0.6);
-	}
-
-	.hero-actions {
-		display: flex;
-		justify-content: center;
-		gap: 16px;
-		flex-wrap: wrap;
-	}
-
-	.btn {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		text-decoration: none;
-		padding: 18px 32px;
-		font-size: 11px;
-		font-weight: 700;
-		text-transform: uppercase;
-		letter-spacing: 0.2em;
-		border: 1px solid transparent;
-	}
-
-	.btn-light {
-		background: #fff;
-		color: #000;
-	}
-
-	.btn-outline {
-		border-color: rgba(255, 255, 255, 0.2);
-		color: #fff;
-	}
-
-	.protocols,
-	.counter-section,
-	.faq-section {
-		padding: 96px 24px;
-		background: #080808;
-		border-top: 1px solid rgba(255, 255, 255, 0.05);
-	}
-
-	.protocol-grid,
-	.counter-grid {
-		max-width: 1280px;
-		margin: 0 auto;
-		display: grid;
-		grid-template-columns: repeat(4, minmax(0, 1fr));
-		gap: 1px;
-		background: rgba(255, 255, 255, 0.05);
-	}
-
-	.protocol-card {
-		background: #000;
-		padding: 48px;
-	}
-
-	.protocol-card h3 {
-		font-family: Syncopate, sans-serif;
-		font-size: 12px;
-		letter-spacing: 0.14em;
-		text-transform: uppercase;
-		color: var(--gold);
-		margin: 0 0 16px;
-	}
-
-	.protocol-card h4 {
-		font-size: 28px;
-		font-weight: 300;
-		margin: 0 0 14px;
-	}
-
-	.protocol-card p,
-	.card-content p,
-	.counter-label,
-	.faq-section div {
-		font-size: 12px;
-		line-height: 1.8;
-		color: rgba(255, 255, 255, 0.55);
-	}
-
-	.expertise-section {
-		max-width: 1280px;
-		margin: 0 auto;
-		padding: 120px 24px;
-	}
-
-	.section-title {
-		font-family: Syncopate, sans-serif;
-		text-align: center;
-		text-transform: uppercase;
-		font-size: clamp(28px, 4vw, 52px);
-		margin: 0 0 64px;
-	}
-
-	.expertise-grid {
-		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
-		gap: 20px;
-	}
-
-	.expertise-card {
-		position: relative;
-		min-height: 560px;
-		overflow: hidden;
-	}
-
-	.premium-img {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		filter: grayscale(100%) brightness(50%) contrast(120%);
-		transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
-	}
-
-	.expertise-card:hover .premium-img {
-		filter: grayscale(0%) brightness(70%) contrast(100%);
-		transform: scale(1.05);
-	}
-
-	.card-overlay {
-		position: absolute;
-		inset: 0;
-		background: linear-gradient(0deg, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.35) 100%);
-	}
-
-	.card-content {
-		position: absolute;
-		z-index: 1;
-		left: 32px;
-		right: 32px;
-		bottom: 32px;
-	}
-
-	.card-content h3 {
-		font-family: Syncopate, sans-serif;
-		font-size: 24px;
-		text-transform: uppercase;
-		margin: 0 0 12px;
-	}
-
-	.quote-section {
-		padding: 180px 24px;
-		text-align: center;
-	}
-
-	.quote-section h2,
-	.contact-content h2 {
-		font-family: Syncopate, sans-serif;
-		text-transform: uppercase;
-		font-size: clamp(36px, 5vw, 82px);
-		line-height: 1.15;
-		margin: 0;
-	}
-
-	.counter-item {
-		background: #000;
-		padding: 36px 12px;
-		text-align: center;
-	}
-
-	.counter {
-		font-size: clamp(42px, 6vw, 88px);
-		margin-bottom: 8px;
-	}
-
-	.counter-label {
-		text-transform: uppercase;
-		letter-spacing: 0.24em;
-	}
-
-	.faq-section {
-		max-width: 980px;
-		margin: 0 auto;
-		background: transparent;
-	}
-
-	details {
-		background: #000;
-		border: 1px solid var(--border);
-		margin-bottom: 12px;
-	}
-
-	summary {
-		list-style: none;
-		padding: 26px;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		text-transform: uppercase;
-		font-family: Syncopate, sans-serif;
-		font-size: 14px;
-		cursor: none;
-	}
-
-	details div {
-		padding: 0 26px 26px;
-	}
-
-	.contact-section {
-		padding: 160px 24px;
-		border-top: 1px solid rgba(255, 255, 255, 0.05);
-		overflow: hidden;
-	}
-
-	.contact-bg {
-		filter: brightness(0.1);
-	}
-
-	.contact-content {
-		position: relative;
-		z-index: 1;
-		text-align: center;
-		max-width: 700px;
-		margin: 0 auto;
-	}
-
-	.contact-content p {
-		font-size: 12px;
-		letter-spacing: 0.04em;
-		color: rgba(255, 255, 255, 0.6);
-		margin: 20px auto 40px;
-	}
-
-	.contact-form {
-		display: grid;
-		gap: 16px;
-	}
-
-	input {
-		background: transparent;
-		border: 0;
-		border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-		color: #fff;
-		padding: 18px;
-		font-size: 12px;
-		text-transform: uppercase;
-		letter-spacing: 0.14em;
-	}
-
-	input:focus {
-		outline: none;
-		border-color: var(--gold);
-	}
-
-	.reveal {
-		opacity: 0;
-		transform: translateY(40px);
-		transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
-	}
-
-	.reveal.active {
-		opacity: 1;
-		transform: translateY(0);
-	}
-
-	@keyframes textReveal {
-		to {
-			clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-			transform: translateY(0);
-		}
-	}
-
-	.reveal-text {
-		clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%);
-		transform: translateY(30px);
-		animation: textReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-	}
-
-	.glow-border {
-		border: 1px solid var(--border);
-		transition: border-color 0.5s ease;
-	}
-
-	.glow-border:hover {
-		border-color: rgba(197, 160, 89, 0.5);
-	}
-
-	@media (max-width: 1024px) {
-		:global(body) {
-			cursor: auto;
-		}
-
-		#cursor {
-			display: none;
-		}
-
-		.top-nav {
-			padding: 20px 16px;
-		}
-
-		.protocol-grid,
-		.counter-grid,
-		.expertise-grid {
-			grid-template-columns: 1fr;
-		}
-
-		.protocol-card,
-		.counter-item,
-		.expertise-card {
-			min-height: auto;
-		}
-
-		summary {
-			cursor: pointer;
-		}
-	}
+  :global(*){box-sizing:border-box;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+  :global(html){scroll-behavior:smooth;scroll-padding-top:80px}
+  :global(body){margin:0;background:#0a0a0a;color:#e5e5e5;overflow-x:hidden}
+  .text-gold{color:#d4af37}.bg-dark{background:#0a0a0a}.bg-charcoal{background:#121212}.bg-slate{background:#1c1c1c}.bg-gold{background:#d4af37}
+  .font-serif{font-family:"Cormorant Garamond",Georgia,serif}.font-sans{font-family:"Manrope",-apple-system,sans-serif}
+  .reveal{opacity:0;transform:translateY(24px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}
+   :global(.reveal.is-visible){opacity:1;transform:translateY(0)}
+  .mobile-menu{transform:translateX(100%);transition:transform .4s cubic-bezier(.16,1,.3,1)}.mobile-menu.open{transform:translateX(0)}
+  .nav-line{transition:all .3s}.line-1-open{transform:rotate(45deg) translate(5px,5px)}.line-2-open{opacity:0}.line-3-open{transform:rotate(-45deg) translate(7px,-6px)}
+   :global(.bg-dark-nav){background:rgba(10,10,10,.95);backdrop-filter:blur(12px);box-shadow:0 10px 20px rgba(0,0,0,.2)}
+   :global(.h-20){height:5rem} :global(.h-16){height:4rem}
+  .glass-panel{background:rgba(28,28,28,.65);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.06)}
+  .form-input:focus{outline:1px solid rgba(212,175,55,.4);border-color:#d4af37}
+  .focus-link:focus{position:fixed;top:1rem;left:1rem;z-index:100;background:#d4af37;color:#000;padding:.5rem 1rem}
 </style>
