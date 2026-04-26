@@ -79,9 +79,6 @@
   }
 
   onMount(() => {
-    const lucideReady = () => window.lucide?.createIcons();
-    lucideReady();
-
     const handleNavScroll = () => {
       const currentScroll = window.pageYOffset;
       if (currentScroll > 60) {
@@ -164,7 +161,6 @@
 
       contactForm.classList.add('hidden');
       formSuccess.classList.remove('hidden');
-      lucideReady();
 
       setTimeout(() => {
         contactForm.classList.remove('hidden');
@@ -197,7 +193,6 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope@5.0.20/300.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope@5.0.20/400.css" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
 </svelte:head>
 
 <a href="#main-content" class="sr-only focus-link">Перейти к основному контенту</a>
@@ -212,7 +207,7 @@
       </div>
       <button class="hidden lg:block border border-white/20 px-7 py-2.5 text-[11px] uppercase tracking-[0.2em] text-white" on:click={scrollToContact}>Обсудить проект</button>
       <button class="lg:hidden text-white" on:click={() => (menuOpen = !menuOpen)} aria-label="menu">
-        <i data-lucide={menuOpen ? 'x' : 'menu'} class="w-6 h-6"></i>
+        <span class="w-6 h-6">{menuOpen ? "✕" : "☰"}</span>
       </button>
     </div>
   </div>
@@ -234,7 +229,7 @@
       <p class="text-gold uppercase tracking-[0.35em] text-xs mb-8">Private & Confidential</p>
       <h1 class="font-serif text-5xl md:text-7xl text-white leading-[1.05] mb-6">Закрытые мероприятия <span class="block italic text-gray-300">без огласки</span></h1>
       <p class="text-gray-400 text-lg max-w-2xl mx-auto mb-10">Организация событий премиум-класса, где ваша приватность является главным активом.</p>
-      <div class="flex flex-col sm:flex-row gap-4 justify-center"><button on:click={scrollToContact} class="bg-gold text-black px-10 py-4 uppercase tracking-[0.2em] text-xs">Обсудить мероприятие</button><button class="border border-white/25 text-white px-10 py-4 uppercase tracking-[0.2em] text-xs flex items-center gap-2"><i data-lucide="lock" class="w-4 h-4"></i>Запросить NDA</button></div>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center"><button on:click={scrollToContact} class="bg-gold text-black px-10 py-4 uppercase tracking-[0.2em] text-xs">Обсудить мероприятие</button><button class="border border-white/25 text-white px-10 py-4 uppercase tracking-[0.2em] text-xs flex items-center gap-2"><span class="w-4 h-4">🔒</span>Запросить NDA</button></div>
     </div>
   </header>
 
@@ -244,9 +239,9 @@
         <h2 class="font-serif text-4xl md:text-5xl text-white mb-8">Конфиденциальность <span class="text-gold italic block">в основе всего</span></h2>
         <p class="text-gray-400 mb-10 text-lg">Мы встраиваем протоколы безопасности в каждый этап подготовки и проведения мероприятия.</p>
         <div class="space-y-6">
-          <div class="flex gap-4"><i data-lucide="file-signature" class="w-5 h-5 text-gold mt-1"></i><div><h4 class="text-white">Жесткий NDA</h4><p class="text-gray-500">С каждым членом команды и подрядчиком.</p></div></div>
-          <div class="flex gap-4"><i data-lucide="camera-off" class="w-5 h-5 text-gold mt-1"></i><div><h4 class="text-white">Контроль съёмки</h4><p class="text-gray-500">Запрет на смартфоны и контроль публикаций.</p></div></div>
-          <div class="flex gap-4"><i data-lucide="user-check" class="w-5 h-5 text-gold mt-1"></i><div><h4 class="text-white">Доступ по спискам</h4><p class="text-gray-500">Фейс-контроль и проверка гостей на входе.</p></div></div>
+          <div class="flex gap-4"><span class="w-5 h-5 text-gold mt-1">✍️</span><div><h4 class="text-white">Жесткий NDA</h4><p class="text-gray-500">С каждым членом команды и подрядчиком.</p></div></div>
+          <div class="flex gap-4"><span class="w-5 h-5 text-gold mt-1">📵</span><div><h4 class="text-white">Контроль съёмки</h4><p class="text-gray-500">Запрет на смартфоны и контроль публикаций.</p></div></div>
+          <div class="flex gap-4"><span class="w-5 h-5 text-gold mt-1">✅</span><div><h4 class="text-white">Доступ по спискам</h4><p class="text-gray-500">Фейс-контроль и проверка гостей на входе.</p></div></div>
         </div>
       </div>
       <div class="reveal"><img src="https://image.qwenlm.ai/public_source/66673185-31fc-400c-9758-01d949190730/1c90a0976-f4c6-45f1-a704-4a8900753e1e.png" alt="confidential" class="w-full h-[500px] object-cover" /></div>
@@ -277,7 +272,7 @@
             <div class="text-xs text-gray-500 mb-5 uppercase tracking-[0.2em]">{c.type}</div>
             <h3 class="font-serif text-2xl text-white mb-5">{c.title}</h3>
             <ul class="space-y-3 text-sm text-gray-400 mb-6">
-              {#each c.points as p}<li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-gold mt-0.5"></i><span>{p}</span></li>{/each}
+              {#each c.points as p}<li class="flex gap-2"><span class="w-4 h-4 text-gold mt-0.5">✓</span><span>{p}</span></li>{/each}
             </ul>
             <p class="text-white/90 italic">“{c.quote}”</p>
           </article>
@@ -289,7 +284,7 @@
   <section class="py-24 bg-dark">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-16 items-center">
       <div class="reveal"><h2 class="font-serif text-4xl md:text-5xl text-white mb-8">Всё остаётся <span class="text-gold block">внутри</span></h2><p class="text-gray-400 text-lg mb-10">Что происходит на мероприятии, остается только в памяти участников.</p></div>
-      <div class="reveal flex items-center justify-center"><div class="w-64 h-64 rounded-full border border-gold/30 flex items-center justify-center"><i data-lucide="shield-check" class="w-14 h-14 text-gold"></i></div></div>
+      <div class="reveal flex items-center justify-center"><div class="w-64 h-64 rounded-full border border-gold/30 flex items-center justify-center"><span class="w-14 h-14 text-gold">🛡️</span></div></div>
     </div>
   </section>
 
@@ -332,7 +327,7 @@
       <div class="space-y-4 reveal">
         {#each faqs as row}
           <details class="group bg-slate border border-white/5">
-            <summary class="flex justify-between items-center font-medium cursor-pointer list-none p-6 text-white"><span>{row[0]}</span><i data-lucide="chevron-down" class="w-5 h-5 text-gold"></i></summary>
+            <summary class="flex justify-between items-center font-medium cursor-pointer list-none p-6 text-white"><span>{row[0]}</span><span class="w-5 h-5 text-gold">⌄</span></summary>
             <div class="px-6 pb-6 text-sm text-gray-400 border-t border-white/5 pt-4">{row[1]}</div>
           </details>
         {/each}
@@ -351,7 +346,7 @@
           </div>
           <button bind:this={submitBtn} type="submit" class="w-full bg-gold text-black font-medium uppercase tracking-[0.2em] text-sm py-4 flex items-center justify-center gap-2"><span bind:this={btnText}>Отправить запрос</span><span bind:this={btnLoading} class="hidden"><svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle></svg></span></button>
         </form>
-        <div bind:this={formSuccess} class="hidden text-center py-8"><i data-lucide="check-circle" class="w-8 h-8 text-gold mx-auto mb-4"></i><h3 class="font-serif text-2xl text-white mb-3">Заявка отправлена</h3></div>
+        <div bind:this={formSuccess} class="hidden text-center py-8"><span class="w-8 h-8 text-gold mx-auto mb-4">✓</span><h3 class="font-serif text-2xl text-white mb-3">Заявка отправлена</h3></div>
       </div>
     </div>
   </section>
@@ -387,4 +382,5 @@
   .glass-panel { background: rgba(28, 28, 28, 0.65); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.06); }
   .form-input:focus { outline: 1px solid rgba(212,175,55,.4); border-color: #d4af37; }
   .focus-link:focus { position: fixed; top: 1rem; left: 1rem; z-index: 100; background: #d4af37; color: #000; padding: .5rem 1rem; }
+  .w-4, .w-5, .w-6, .w-8, .w-14 { display:inline-flex; align-items:center; justify-content:center; }
 </style>
