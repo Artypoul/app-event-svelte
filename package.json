@@ -1,12 +1,17 @@
 {
-  "name": "svelte-app",
-  "version": "1.0.0",
+  "name": "app-event-svelte",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
-    "build": "rollup -c",
     "dev": "rollup -c -w",
-    "start": "sirv public --no-clear"
+    "start": "sirv public --host 0.0.0.0 --port 4173 --single --no-clear",
+    "build": "rollup -c",
+    "preview": "npm run build && npm run start",
+    "check": "npm run build"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^24.0.0",
