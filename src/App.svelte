@@ -11,6 +11,7 @@
   let submitBtn;
   let btnText;
   let btnLoading;
+  let scrollTick = false;
 
   const navLinks = [
     { href: '#confidentiality', title: 'Конфиденциальность' },
@@ -94,7 +95,16 @@
       }
     };
 
-    window.addEventListener('scroll', handleNavScroll, { passive: true });
+    const onScroll = () => {
+      if (scrollTick) return;
+      scrollTick = true;
+      requestAnimationFrame(() => {
+        handleNavScroll();
+        scrollTick = false;
+      });
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
 
     const revealObserver = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
@@ -172,14 +182,21 @@
       }, 4000);
     };
 
-    contactForm.addEventListener('submit', onSubmit);
+    contactForm?.addEventListener('submit', onSubmit);
+    document.querySelectorAll('.form-input').forEach((input) => {
+      input.addEventListener('input', () => {
+        input.classList.remove('border-red-400');
+        input.parentElement.querySelector('.error-message')?.classList.add('hidden');
+      });
+    });
 
     return () => {
-      window.removeEventListener('scroll', handleNavScroll);
+      window.removeEventListener('scroll', onScroll);
       document.removeEventListener('keydown', onEsc);
       revealObserver.disconnect();
       counterObserver.disconnect();
       contactForm?.removeEventListener('submit', onSubmit);
+      document.body.style.overflow = '';
     };
   });
 </script>
@@ -206,7 +223,15 @@
         {/each}
       </div>
       <button class="hidden lg:block border border-white/20 px-7 py-2.5 text-[11px] uppercase tracking-[0.2em] text-white" on:click={scrollToContact}>Обсудить проект</button>
-      <button class="lg:hidden text-white" on:click={() => (menuOpen = !menuOpen)} aria-label="menu">
+      <button
+        class="lg:hidden text-white"
+        on:click={() => {
+          menuOpen = !menuOpen;
+          document.body.style.overflow = menuOpen ? 'hidden' : '';
+        }}
+        aria-label="Открыть меню"
+        aria-expanded={menuOpen}
+      >
         <span class="w-6 h-6">{menuOpen ? "✕" : "☰"}</span>
       </button>
     </div>
@@ -214,9 +239,9 @@
   <div class="mobile-menu fixed inset-0 z-40 bg-black/95 backdrop-blur-xl lg:hidden" class:open={menuOpen}>
     <div class="flex flex-col items-center justify-center h-full space-y-8">
       {#each navLinks as link}
-        <a href={link.href} class="text-2xl font-serif text-white hover:text-gold" on:click={() => (menuOpen = false)}>{link.title}</a>
+        <a href={link.href} class="text-2xl font-serif text-white hover:text-gold" on:click={() => { menuOpen = false; document.body.style.overflow = ''; }}>{link.title}</a>
       {/each}
-      <button on:click={() => { menuOpen = false; scrollToContact(); }} class="bg-gold text-black px-10 py-3 text-sm uppercase tracking-[0.2em]">Обсудить проект</button>
+      <button on:click={() => { menuOpen = false; document.body.style.overflow = ''; scrollToContact(); }} class="bg-gold text-black px-10 py-3 text-sm uppercase tracking-[0.2em]">Обсудить проект</button>
     </div>
   </div>
 </nav>
@@ -339,10 +364,10 @@
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="glass-panel p-8 md:p-12 reveal">
         <div class="text-center mb-10"><h2 class="font-serif text-4xl text-white mb-4">Обсудим ваше мероприятие</h2><p class="text-gray-400">Оставьте заявку. Мы свяжемся через защищённый канал.</p></div>
-        <form bind:this={contactForm} class="space-y-6" novalidate>
+        <form bind:this={contactForm} class="space-y-6" novalidate aria-label="Форма заявки на мероприятие">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div><label for="name" class="text-xs uppercase tracking-[0.2em] text-gray-500">Имя *</label><input id="name" type="text" class="form-input w-full bg-black/40 border border-white/10 p-4 text-white text-sm mt-2" /><p class="error-message text-red-400 text-[11px] hidden">Введите ваше имя</p></div>
-            <div><label for="contact-info" class="text-xs uppercase tracking-[0.2em] text-gray-500">Телефон / Telegram *</label><input id="contact-info" type="text" class="form-input w-full bg-black/40 border border-white/10 p-4 text-white text-sm mt-2" /><p class="error-message text-red-400 text-[11px] hidden">Укажите способ связи</p></div>
+            <div><label for="name" class="text-xs uppercase tracking-[0.2em] text-gray-500">Имя *</label><input id="name" type="text" required autocomplete="name" class="form-input w-full bg-black/40 border border-white/10 p-4 text-white text-sm mt-2" /><p class="error-message text-red-400 text-[11px] hidden">Введите ваше имя</p></div>
+            <div><label for="contact-info" class="text-xs uppercase tracking-[0.2em] text-gray-500">Телефон / Telegram *</label><input id="contact-info" type="text" required autocomplete="tel" class="form-input w-full bg-black/40 border border-white/10 p-4 text-white text-sm mt-2" /><p class="error-message text-red-400 text-[11px] hidden">Укажите способ связи</p></div>
           </div>
           <button bind:this={submitBtn} type="submit" class="w-full bg-gold text-black font-medium uppercase tracking-[0.2em] text-sm py-4 flex items-center justify-center gap-2"><span bind:this={btnText}>Отправить запрос</span><span bind:this={btnLoading} class="hidden"><svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle></svg></span></button>
         </form>
