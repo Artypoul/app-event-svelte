@@ -1,267 +1,245 @@
-<script>
-  import { onMount } from 'svelte';
-
-  let navbar;
-  let navInner;
-  let mobileMenu;
-  let mobileToggle;
-  let menuOpen = false;
-  let navbarHeight = 80;
-
-  let contactForm;
-  let formSuccess;
-  let submitBtn;
-  let btnText;
-  let btnLoading;
-
-  const mobileLinks = [
-    { href: '#confidentiality', title: 'Конфиденциальность' },
-    { href: '#formats', title: 'Форматы' },
-    { href: '#cases', title: 'Кейсы' },
-    { href: '#faq', title: 'FAQ' }
-  ];
-
-  const formatCards = [
-    ['Корпоративные события', 'Закрытые встречи акционеров, стратегические сессии, юбилеи компаний.', '/02-corporate-format.png'],
-    ['Частные мероприятия', 'Свадьбы, дни рождения, семейные торжества в узком кругу.', '/03-private-format.png'],
-    ['VIP / Closed Events', 'Вечеринки для избранных, концерты private gig, закрытые показы.', '/05-case-archive-1.png'],
-    ['Под ключ', 'Полная организация логистики, охраны и контента без вашего участия.', '/04-production-format.png']
-  ];
-
-  function scrollToContact() {
-    const contactSection = document.getElementById('contact');
-    const offset = navbarHeight + 20;
-    const elementPosition = contactSection.getBoundingClientRect().top;
-    window.scrollTo({ top: elementPosition + window.pageYOffset - offset, behavior: 'smooth' });
-  }
-
-  function openMobileMenu() {
-    menuOpen = true;
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeMobileMenu() {
-    menuOpen = false;
-    document.body.style.overflow = '';
-  }
-
-  onMount(() => {
-    const lucideReady = () => window.lucide?.createIcons();
-    lucideReady();
-
-    const handleNavScroll = () => {
-      const currentScroll = window.pageYOffset;
-      if (currentScroll > 60) {
-        navbar.classList.add('bg-dark-nav');
-        navInner.classList.remove('h-20');
-        navInner.classList.add('h-16');
-        navbarHeight = 64;
-      } else {
-        navbar.classList.remove('bg-dark-nav');
-        navInner.classList.add('h-20');
-        navInner.classList.remove('h-16');
-        navbarHeight = 80;
-      }
-    };
-
-    window.addEventListener('scroll', handleNavScroll, { passive: true });
-
-    const revealObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-          revealObserver.unobserve(entry.target);
-        }
-      });
-    }, { rootMargin: '0px 0px -60px 0px', threshold: 0.1 });
-
-    document.querySelectorAll('.reveal').forEach((el) => revealObserver.observe(el));
-
-    const counterObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        const counter = entry.target;
-        const target = parseInt(counter.dataset.target);
-        const suffix = counter.dataset.suffix || '';
-        const duration = 2000;
-        const startTime = performance.now();
-
-        const updateCounter = (currentTime) => {
-          const progress = Math.min((currentTime - startTime) / duration, 1);
-          const eased = 1 - Math.pow(1 - progress, 3);
-          counter.textContent = Math.round(eased * target) + suffix;
-          if (progress < 1) requestAnimationFrame(updateCounter);
-        };
-
-        requestAnimationFrame(updateCounter);
-        counterObserver.unobserve(counter);
-      });
-    }, { threshold: 0.5 });
-
-    document.querySelectorAll('.counter-value[data-target]').forEach((el) => counterObserver.observe(el));
-
-    const heroImage = document.querySelector('.hero-image');
-    const onHeroScroll = () => {
-      if (heroImage && window.pageYOffset < window.innerHeight) {
-        heroImage.style.transform = `scale(1.1) translateY(${window.pageYOffset * 0.3}px)`;
-      }
-    };
-    window.addEventListener('scroll', onHeroScroll, { passive: true });
-
-    const onEsc = (e) => e.key === 'Escape' && menuOpen && closeMobileMenu();
-    document.addEventListener('keydown', onEsc);
-
-    const onSubmit = async (e) => {
-      e.preventDefault();
-      document.querySelectorAll('.error-message').forEach((msg) => msg.classList.add('hidden'));
-      document.querySelectorAll('.form-input').forEach((input) => input.classList.remove('border-red-400'));
-
-      const nameInput = document.getElementById('name');
-      const contactInput = document.getElementById('contact-info');
-      let isValid = true;
-
-      if (!nameInput.value.trim()) {
-        nameInput.classList.add('border-red-400');
-        nameInput.parentElement.querySelector('.error-message').classList.remove('hidden');
-        isValid = false;
-      }
-      if (!contactInput.value.trim()) {
-        contactInput.classList.add('border-red-400');
-        contactInput.parentElement.querySelector('.error-message').classList.remove('hidden');
-        isValid = false;
-      }
-      if (!isValid) return;
-
-      submitBtn.disabled = true;
-      btnText.classList.add('hidden');
-      btnLoading.classList.remove('hidden');
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      contactForm.classList.add('hidden');
-      formSuccess.classList.remove('hidden');
-      lucideReady();
-
-      setTimeout(() => {
-        contactForm.classList.remove('hidden');
-        formSuccess.classList.add('hidden');
-        contactForm.reset();
-        submitBtn.disabled = false;
-        btnText.classList.remove('hidden');
-        btnLoading.classList.add('hidden');
-      }, 5000);
-    };
-
-    contactForm.addEventListener('submit', onSubmit);
-
-    document.querySelectorAll('.form-input').forEach((input) => {
-      input.addEventListener('input', () => {
-        input.classList.remove('border-red-400');
-        input.parentElement.querySelector('.error-message')?.classList.add('hidden');
-      });
-    });
-
-    return () => {
-      window.removeEventListener('scroll', handleNavScroll);
-      window.removeEventListener('scroll', onHeroScroll);
-      document.removeEventListener('keydown', onEsc);
-      revealObserver.disconnect();
-      counterObserver.disconnect();
-      contactForm?.removeEventListener('submit', onSubmit);
-    };
-  });
-</script>
-
 <svelte:head>
-  <title>Closed Events | Закрытые мероприятия</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/cormorant-garamond@5.0.8/300.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/cormorant-garamond@5.0.8/400.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/cormorant-garamond@5.0.8/600.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/cormorant-garamond@5.0.8/400-italic.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope@5.0.20/200.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope@5.0.20/300.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope@5.0.20/400.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope@5.0.20/500.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BROSCO Private Events | Конфиденциальные мероприятия</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gold: '#C9A961',
+            dark: '#0A0A0A',
+            'dark-light': '#141414',
+            panel: '#1A1A1A'
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            serif: ['Playfair Display', 'serif']
+          }
+        }
+      }
+    };
+  </script>
 </svelte:head>
 
-<a href="#main-content" class="sr-only focus-link">Перейти к основному контенту</a>
-
-<nav id="navbar" bind:this={navbar} class="fixed w-full z-50 top-0 transition-all duration-400 ease-out" aria-label="Основная навигация">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div id="nav-inner" bind:this={navInner} class="flex items-center justify-between h-20 transition-all duration-400">
-      <a href="#main-content" class="relative z-50 text-xl sm:text-2xl font-serif font-semibold tracking-[0.2em] text-white uppercase flex-shrink-0">Closed<span class="text-gold">.</span>Events</a>
-      <div class="hidden lg:flex items-center space-x-10">
-        {#each mobileLinks as link}
-          <a href={link.href} class="text-xs uppercase tracking-[0.2em] text-gray-400 hover:text-gold transition-colors duration-300 relative group">{link.title}<span class="absolute -bottom-1 left-0 w-0 h-px bg-gold transition-all duration-300 group-hover:w-full"></span></a>
-        {/each}
-      </div>
-      <div class="hidden lg:block"><button on:click={scrollToContact} class="border border-white/20 px-7 py-2.5 text-[11px] uppercase tracking-[0.2em] text-white hover:bg-gold hover:border-gold hover:text-black transition-all duration-300">Обсудить проект</button></div>
-      <button bind:this={mobileToggle} class="lg:hidden relative z-50 w-10 h-10 flex items-center justify-center" aria-label={menuOpen ? 'Закрыть меню' : 'Открыть меню'} aria-expanded={menuOpen} on:click={() => (menuOpen ? closeMobileMenu() : openMobileMenu())}>
-        <div class="flex flex-col items-center justify-center w-6 h-5 relative">
-          <span class="nav-line absolute w-full h-px bg-white" class:line-1-open={menuOpen} style="top:0"></span>
-          <span class="nav-line absolute w-full h-px bg-white" class:line-2-open={menuOpen} style="top:50%;transform:translateY(-50%)"></span>
-          <span class="nav-line absolute w-full h-px bg-white" class:line-3-open={menuOpen} style="bottom:0"></span>
-        </div>
-      </button>
-    </div>
-  </div>
-  <div id="mobile-menu" bind:this={mobileMenu} class="mobile-menu fixed inset-0 z-40 bg-dark/98 backdrop-blur-xl lg:hidden" class:open={menuOpen}>
-    <div class="flex flex-col items-center justify-center h-full space-y-8">
-      {#each mobileLinks as link}
-        <a href={link.href} class="text-2xl font-serif text-white hover:text-gold" on:click={closeMobileMenu}>{link.title}</a>
-      {/each}
-      <div class="pt-8"><button on:click={() => { closeMobileMenu(); scrollToContact(); }} class="bg-gold text-black px-10 py-3 text-sm uppercase tracking-[0.2em] font-medium">Обсудить проект</button></div>
-    </div>
-  </div>
-</nav>
-
-<main id="main-content" class="font-sans antialiased bg-dark text-gray-200">
-  <header class="relative h-screen min-h-[700px] flex items-center justify-center overflow-hidden">
-    <div class="absolute inset-0 z-0"><img src="/01-hero-background.png" alt="hero" class="hero-image w-full h-full object-cover scale-110 transition-transform duration-[3s] ease-out" /><div class="absolute inset-0 bg-gradient-to-b from-dark/70 via-dark/40 to-dark"></div></div>
-    <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 text-center reveal">
-      <p class="text-gold uppercase tracking-[0.35em] text-xs mb-8 font-medium">Private & Confidential</p>
-      <h1 class="font-serif text-[2.5rem] sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl leading-[1.05] mb-8 text-white">Закрытые мероприятия <span class="block italic text-gray-300/80 text-[2rem] sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl mt-3">без огласки</span></h1>
-      <p class="text-gray-400 text-base sm:text-lg md:text-xl max-w-2xl mx-auto mb-12 font-light leading-relaxed">Организация событий премиум-класса, где ваша приватность является главным активом.</p>
-      <div class="flex flex-col sm:flex-row gap-4 sm:gap-5 justify-center items-center"><button on:click={scrollToContact} class="w-full sm:w-auto bg-gold text-black px-10 py-4 uppercase tracking-[0.2em] text-xs sm:text-sm font-medium">Обсудить мероприятие</button><button class="w-full sm:w-auto border border-white/25 text-white px-10 py-4 uppercase tracking-[0.2em] text-xs sm:text-sm font-medium flex items-center justify-center gap-2.5"><i data-lucide="lock" class="w-3.5 h-3.5"></i>Запросить NDA</button></div>
+<div class="antialiased bg-dark text-white">
+  <header class="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-dark/95 backdrop-blur-sm">
+    <div class="mx-auto flex h-20 max-w-[1440px] items-center justify-between px-6 lg:px-8">
+      <a href="#hero" class="flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center bg-white text-dark text-lg font-bold">B</div>
+        <span class="text-sm font-semibold tracking-[0.2em] uppercase">Brosco <span class="text-gold">Private</span></span>
+      </a>
+      <nav class="hidden lg:flex items-center gap-8 text-[11px] uppercase tracking-[0.15em] text-white/50">
+        <a href="#guarantees" class="hover:text-white transition">Гарантии</a>
+        <a href="#services" class="hover:text-white transition">Форматы</a>
+        <a href="#cases" class="hover:text-white transition">Кейсы</a>
+        <a href="#approach" class="hover:text-white transition">Подход</a>
+        <a href="#guests" class="hover:text-white transition">Гости</a>
+        <a href="#faq" class="hover:text-white transition">FAQ</a>
+      </nav>
+      <a href="#contact" class="hidden md:flex border border-white/20 px-6 py-2 text-[10px] uppercase tracking-widest hover:border-gold hover:text-gold transition">Запросить NDA</a>
     </div>
   </header>
 
-  <section id="formats" class="py-20 sm:py-24 lg:py-28 bg-dark">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12 sm:mb-16 reveal"><span class="text-gold uppercase tracking-[0.3em] text-xs font-medium">Экспертиза</span><h2 class="font-serif text-3xl sm:text-4xl md:text-5xl mt-4 text-white">Форматы мероприятий</h2></div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
-        {#each formatCards as card, i}
-          <div class="group relative h-[380px] sm:h-[420px] lg:h-[440px] overflow-hidden cursor-pointer reveal" style={`transition-delay:${i * 100}ms`}>
-            <img src={card[2]} alt={card[0]} class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/20"></div>
-            <div class="absolute bottom-0 left-0 right-0 p-6 sm:p-8"><h3 class="font-serif text-xl sm:text-2xl text-white mb-2 group-hover:text-gold transition-colors duration-300">{card[0]}</h3><p class="text-gray-400 text-sm opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-3 group-hover:translate-y-0">{card[1]}</p></div>
-          </div>
-        {/each}
+  <main>
+    <section id="hero" class="relative min-h-screen flex items-center pt-20 overflow-hidden">
+      <div class="absolute inset-0 z-0">
+        <img src="/01-hero-background.png" class="w-full h-full object-cover" alt="Hero" />
+        <div class="hero-overlay absolute inset-0"></div>
       </div>
+
+      <div class="relative z-10 max-w-[1440px] mx-auto px-6 lg:px-8 w-full">
+        <div class="max-w-4xl">
+          <div class="flex items-center gap-3 mb-6 text-gold text-[10px] uppercase tracking-[0.2em] font-semibold">
+            <div class="w-2 h-2 rounded-full bg-gold"></div> Закрытые мероприятия
+          </div>
+          <h1 class="text-4xl md:text-6xl lg:text-7xl font-light uppercase tracking-tight leading-[1.1] mb-8">
+            Организуем мероприятия, <br />о которых знают <span class="font-serif italic text-gold normal-case">только приглашенные</span>
+          </h1>
+          <p class="text-lg md:text-xl text-white/60 mb-12 max-w-2xl font-light">
+            Частные, корпоративные и VIP-события под ключ — с полным контролем доступа, материалов и всех чувствительных деталей.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4">
+            <a href="#contact" class="bg-white text-dark px-10 py-5 text-xs font-bold uppercase tracking-[0.15em] text-center hover:bg-gold transition">Обсудить мероприятие</a>
+            <a href="#contact" class="border border-white/20 px-10 py-5 text-xs font-bold uppercase tracking-[0.15em] text-center hover:border-gold transition">Запросить NDA</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="guarantees" class="py-24 bg-dark-light border-y border-white/5">
+      <div class="max-w-[1440px] mx-auto px-6 lg:px-8">
+        <div class="mb-16">
+          <div class="flex items-center gap-3 mb-4 text-gold text-[10px] uppercase tracking-[0.2em] font-semibold">
+            <div class="w-2 h-2 rounded-full bg-gold"></div> Гарантии
+          </div>
+          <h2 class="text-3xl md:text-5xl font-light uppercase tracking-tight">Конфиденциальность в основе</h2>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div class="glass-panel p-8"><div class="text-gold text-3xl font-serif italic mb-6">01</div><h3 class="text-xl font-medium mb-3">NDA с командой</h3><p class="text-white/50 font-light text-sm">Все участники проекта работают по согласованным правилам конфиденциальности.</p></div>
+          <div class="glass-panel p-8"><div class="text-gold text-3xl font-serif italic mb-6">02</div><h3 class="text-xl font-medium mb-3">Контроль съёмки</h3><p class="text-white/50 font-light text-sm">Заранее определяем, что можно снимать, хранить и публиковать.</p></div>
+          <div class="glass-panel p-8"><div class="text-gold text-3xl font-serif italic mb-6">03</div><h3 class="text-xl font-medium mb-3">Доступ по спискам</h3><p class="text-white/50 font-light text-sm">На площадке действует персональный допуск для гостей и команды.</p></div>
+          <div class="glass-panel p-8"><div class="text-gold text-3xl font-serif italic mb-6">04</div><h3 class="text-xl font-medium mb-3">Регламент материалов</h3><p class="text-white/50 font-light text-sm">Фото, видео и документы передаются и хранятся по утверждённому сценарию.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="services" class="py-24 bg-dark">
+      <div class="max-w-[1440px] mx-auto px-6 lg:px-8">
+        <div class="grid lg:grid-cols-[1fr_1fr] gap-12 items-end mb-16">
+          <div>
+            <div class="flex items-center gap-3 mb-4 text-gold text-[10px] uppercase tracking-[0.2em] font-semibold"><div class="w-2 h-2 rounded-full bg-gold"></div> Услуги</div>
+            <h2 class="text-3xl md:text-5xl font-light uppercase tracking-tight">Форматы мероприятий</h2>
+          </div>
+          <div class="lg:border-l border-gold pl-6"><p class="text-white/60 text-lg font-light">От камерных встреч до статусных событий с полной координацией всех этапов.</p></div>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="glass-panel p-8 flex flex-col justify-between min-h-[280px]"><h3 class="text-xl font-medium uppercase tracking-tight mb-4 text-white">Корпоративные <br />события</h3><p class="text-sm text-white/50 font-light">Стратегические сессии, клиентские встречи, внутренние события и деловые ужины.</p></div>
+          <div class="glass-panel p-8 flex flex-col justify-between min-h-[280px]"><h3 class="text-xl font-medium uppercase tracking-tight mb-4 text-white">Частные <br />мероприятия</h3><p class="text-sm text-white/50 font-light">Дни рождения, камерные ужины, family celebrations и private gatherings.</p></div>
+          <div class="glass-panel p-8 flex flex-col justify-between min-h-[280px]"><h3 class="text-xl font-medium uppercase tracking-tight mb-4 text-white">VIP / Closed <br />Events</h3><p class="text-sm text-white/50 font-light">Приёмы, презентации, визиты специальных гостей и события с особым протоколом.</p></div>
+          <div class="glass-panel p-8 flex flex-col justify-between min-h-[280px]"><h3 class="text-xl font-medium uppercase tracking-tight mb-4 text-gold">Проекты <br />Под ключ</h3><p class="text-sm text-white/50 font-light">Берём на себя концепцию, площадку, тайминг, подрядчиков и сопровождение проекта.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="cases" class="py-24 bg-dark-light border-y border-white/5">
+      <div class="max-w-[1440px] mx-auto px-6 lg:px-8">
+        <div class="grid lg:grid-cols-[1fr_1fr] gap-12 items-start mb-16">
+          <div>
+            <div class="flex items-center gap-3 mb-4 text-gold text-[10px] uppercase tracking-[0.2em] font-semibold"><div class="w-2 h-2 rounded-full bg-gold"></div> Кейсы</div>
+            <h2 class="text-3xl md:text-5xl font-light uppercase tracking-tight">Закрытые кейсы</h2>
+          </div>
+          <div class="lg:border-l border-gold pl-6"><p class="text-white/60 text-lg font-light mb-6">Показываем формат, уровень сервиса и подход — без раскрытия клиентов.</p><a href="#contact" class="border border-gold text-gold px-8 py-3 text-[10px] uppercase tracking-widest hover:bg-gold hover:text-dark transition">Смотреть детали</a></div>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="glass-panel overflow-hidden image-hover-color group"><div class="h-64 overflow-hidden relative"><img src="/05-case-archive-1.png" class="w-full h-full object-cover" alt="Ужин" /></div><div class="p-6"><h3 class="text-lg font-medium mb-4 leading-tight">Закрытый ужин для собственников бизнеса</h3><div class="text-xs text-white/40 space-y-2 mb-6"><p>• 40 гостей</p><p>• Москва</p><p>• Полный контроль доступа</p></div><p class="text-xs text-white/60 border-t border-white/10 pt-4"><span class="text-gold">Итог:</span> доверительная атмосфера без лишнего внимания.</p></div></div>
+          <div class="glass-panel overflow-hidden image-hover-color group"><div class="h-64 overflow-hidden relative"><img src="/06-case-archive-2.png" class="w-full h-full object-cover" alt="Камерное" /></div><div class="p-6"><h3 class="text-lg font-medium mb-4 leading-tight">Камерное частное событие</h3><div class="text-xs text-white/40 space-y-2 mb-6"><p>• 30 гостей</p><p>• Загородная резиденция</p><p>• Деликатное сопровождение</p></div><p class="text-xs text-white/60 border-t border-white/10 pt-4"><span class="text-gold">Итог:</span> уютный private-format с максимальной конфиденциальностью.</p></div></div>
+          <div class="glass-panel overflow-hidden image-hover-color group"><div class="h-64 overflow-hidden relative"><img src="/02-corporate-format.png" class="w-full h-full object-cover" alt="Презентация" /></div><div class="p-6"><h3 class="text-lg font-medium mb-4 leading-tight">Презентация для партнёров и инвесторов</h3><div class="text-xs text-white/40 space-y-2 mb-6"><p>• 70 гостей</p><p>• Москва</p><p>• Работа по NDA</p></div><p class="text-xs text-white/60 border-t border-white/10 pt-4"><span class="text-gold">Итог:</span> точная координация и защищённая коммуникация.</p></div></div>
+          <div class="glass-panel overflow-hidden image-hover-color group"><div class="h-64 overflow-hidden relative"><img src="/04-production-format.png" class="w-full h-full object-cover" alt="Сессия" /></div><div class="p-6"><h3 class="text-lg font-medium mb-4 leading-tight">Корпоративная стратегическая сессия</h3><div class="text-xs text-white/40 space-y-2 mb-6"><p>• 60 гостей</p><p>• Подмосковье</p><p>• Закрытый формат</p></div><p class="text-xs text-white/60 border-t border-white/10 pt-4"><span class="text-gold">Итог:</span> рабочая атмосфера без отвлечений с контролем сценария.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="approach" class="py-24 bg-dark">
+      <div class="max-w-[1440px] mx-auto px-6 lg:px-8">
+        <div class="mb-16"><div class="flex items-center gap-3 mb-4 text-gold text-[10px] uppercase tracking-[0.2em] font-semibold"><div class="w-2 h-2 rounded-full bg-gold"></div> Подход</div><h2 class="text-3xl md:text-5xl font-light uppercase tracking-tight mb-6">Всё остаётся внутри</h2><p class="text-white/60 text-lg font-light max-w-2xl">Мы выстраиваем проект так, чтобы защищать гостей, информацию, материалы и репутацию клиента.</p></div>
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="glass-panel p-8"><h3 class="text-xl font-medium mb-4 text-white uppercase tracking-tight border-b border-gold pb-4 inline-block">Гости</h3><p class="text-sm text-white/50 font-light mt-4">Закрытые списки, деликатное сопровождение и контролируемый доступ на каждом этапе события.</p></div>
+          <div class="glass-panel p-8"><h3 class="text-xl font-medium mb-4 text-white uppercase tracking-tight border-b border-gold pb-4 inline-block">Информация</h3><p class="text-sm text-white/50 font-light mt-4">Сценарии, тайминги и рабочие детали остаются строго внутри проектного контура.</p></div>
+          <div class="glass-panel p-8"><h3 class="text-xl font-medium mb-4 text-white uppercase tracking-tight border-b border-gold pb-4 inline-block">Материалы</h3><p class="text-sm text-white/50 font-light mt-4">Фото, видео и документы не выходят в публичное поле без прямого согласования.</p></div>
+          <div class="glass-panel p-8"><h3 class="text-xl font-medium mb-4 text-white uppercase tracking-tight border-b border-gold pb-4 inline-block">Репутация</h3><p class="text-sm text-white/50 font-light mt-4">Мы защищаем не только событие, но и доверие к вашему имени, бренду и кругу общения.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="py-20 border-y border-white/5 bg-dark-light">
+      <div class="max-w-[1440px] mx-auto px-6 lg:px-8">
+        <div class="flex items-center gap-3 mb-10 text-gold text-[10px] uppercase tracking-[0.2em] font-semibold"><div class="w-2 h-2 rounded-full bg-gold"></div> Доверие</div>
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-8 text-center md:text-left divide-x divide-white/10">
+          <div class="px-4"><div class="text-4xl lg:text-5xl font-light text-white mb-2">50+</div><div class="text-[11px] uppercase tracking-widest text-white/50">мероприятий</div></div>
+          <div class="px-4"><div class="text-4xl lg:text-5xl font-light text-white mb-2">7+</div><div class="text-[11px] uppercase tracking-widest text-white/50">лет опыта</div></div>
+          <div class="px-4"><div class="text-4xl lg:text-5xl font-light text-gold mb-2">100%</div><div class="text-[11px] uppercase tracking-widest text-white/50">NDA-проектов</div></div>
+          <div class="px-4"><div class="text-4xl lg:text-5xl font-light text-white mb-2">20+</div><div class="text-[11px] uppercase tracking-widest text-white/50">городов</div></div>
+          <div class="px-4"><div class="text-4xl lg:text-5xl font-light text-white mb-2">85%</div><div class="text-[11px] uppercase tracking-widest text-white/50">повторных клиентов</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="guests" class="py-24 bg-dark">
+      <div class="max-w-[1440px] mx-auto px-6 lg:px-8">
+        <div class="mb-16"><div class="flex items-center gap-3 mb-4 text-gold text-[10px] uppercase tracking-[0.2em] font-semibold"><div class="w-2 h-2 rounded-full bg-gold"></div> Special Guests</div><h2 class="text-3xl md:text-5xl font-light uppercase tracking-tight mb-6">Публичные гости</h2><p class="text-white/60 text-lg font-light max-w-2xl">Работаем с артистами, ведущими и статусными гостями в закрытом формате — без лишней публичности.</p></div>
+        <div class="grid lg:grid-cols-2 gap-6">
+          <div class="glass-panel overflow-hidden image-hover-color relative h-[400px] lg:h-auto"><img src="/05-case-archive-1.png" class="absolute inset-0 w-full h-full object-cover" alt="Артист" /><div class="absolute inset-0 bg-gradient-to-t from-dark via-dark/50 to-transparent"></div><div class="absolute bottom-0 p-8 z-10"><h3 class="text-2xl font-medium text-white mb-2">Артист федерального уровня</h3><p class="text-gold text-sm tracking-widest uppercase">Частное событие</p></div></div>
+          <div class="grid sm:grid-cols-2 gap-6">
+            <div class="glass-panel overflow-hidden image-hover-color relative h-[250px]"><img src="/06-case-archive-2.png" class="absolute inset-0 w-full h-full object-cover" alt="Хедлайнер" /><div class="absolute inset-0 bg-gradient-to-t from-dark to-transparent"></div><div class="absolute bottom-0 p-6 z-10"><h3 class="text-lg font-medium text-white mb-1">Муз. хедлайнер</h3><p class="text-white/50 text-xs">VIP appearance</p></div></div>
+            <div class="glass-panel overflow-hidden image-hover-color relative h-[250px]"><img src="/02-corporate-format.png" class="absolute inset-0 w-full h-full object-cover" alt="Ведущая" /><div class="absolute inset-0 bg-gradient-to-t from-dark to-transparent"></div><div class="absolute bottom-0 p-6 z-10"><h3 class="text-lg font-medium text-white mb-1">Телеведущая</h3><p class="text-white/50 text-xs">Закрытый ужин</p></div></div>
+            <div class="glass-panel overflow-hidden image-hover-color relative h-[250px]"><img src="/03-private-format.png" class="absolute inset-0 w-full h-full object-cover" alt="Персона" /><div class="absolute inset-0 bg-gradient-to-t from-dark to-transparent"></div><div class="absolute bottom-0 p-6 z-10"><h3 class="text-lg font-medium text-white mb-1">Публичная персона</h3><p class="text-white/50 text-xs">Private event</p></div></div>
+            <div class="glass-panel overflow-hidden image-hover-color relative h-[250px]"><img src="/04-production-format.png" class="absolute inset-0 w-full h-full object-cover" alt="Гость" /><div class="absolute inset-0 bg-gradient-to-t from-dark to-transparent"></div><div class="absolute bottom-0 p-6 z-10"><h3 class="text-lg font-medium text-white mb-1">Специальный гость</h3><p class="text-white/50 text-xs">Closed event</p></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="reviews" class="py-24 bg-dark-light border-y border-white/5">
+      <div class="max-w-[1440px] mx-auto px-6 lg:px-8">
+        <div class="mb-16"><div class="flex items-center gap-3 mb-4 text-gold text-[10px] uppercase tracking-[0.2em] font-semibold"><div class="w-2 h-2 rounded-full bg-gold"></div> Отзывы</div><h2 class="text-3xl md:text-5xl font-light uppercase tracking-tight mb-6">Что говорят клиенты</h2><p class="text-white/60 text-lg font-light max-w-2xl">Нас рекомендуют за точность, деликатность и контроль на каждом этапе.</p></div>
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="glass-panel p-10 relative"><div class="text-gold text-6xl font-serif leading-none absolute top-6 left-6 opacity-30">“</div><p class="text-white/80 font-light leading-relaxed relative z-10 pt-4 mb-8">Команда провела закрытый ужин без лишнего внимания и идеально выдержала весь сценарий. Всё было деликатно, спокойно и безупречно организовано.</p><div class="border-t border-white/10 pt-4"><p class="text-gold text-xs uppercase tracking-widest">Собственник инвестиционной компании</p></div></div>
+          <div class="glass-panel p-10 relative"><div class="text-gold text-6xl font-serif leading-none absolute top-6 left-6 opacity-30">“</div><p class="text-white/80 font-light leading-relaxed relative z-10 pt-4 mb-8">Нам был важен не только уровень сервиса, но и приватность гостей. Проект реализовали точно, аккуратно и без лишней огласки.</p><div class="border-t border-white/10 pt-4"><p class="text-gold text-xs uppercase tracking-widest">Private client</p></div></div>
+          <div class="glass-panel p-10 relative"><div class="text-gold text-6xl font-serif leading-none absolute top-6 left-6 opacity-30">“</div><p class="text-white/80 font-light leading-relaxed relative z-10 pt-4 mb-8">Редкий случай, когда подрядчик одинаково хорошо держит и эстетику события, и контроль всех чувствительных деталей.</p><div class="border-t border-white/10 pt-4"><p class="text-gold text-xs uppercase tracking-widest">Руководитель корпоративных коммуникаций</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq" class="py-24 bg-dark">
+      <div class="max-w-[1440px] mx-auto px-6 lg:px-8">
+        <div class="grid lg:grid-cols-[1fr_1.5fr] gap-16">
+          <div><div class="flex items-center gap-3 mb-4 text-gold text-[10px] uppercase tracking-[0.2em] font-semibold"><div class="w-2 h-2 rounded-full bg-gold"></div> FAQ</div><h2 class="text-3xl md:text-5xl font-light uppercase tracking-tight mb-6">Важное <br />перед стартом</h2><p class="text-white/60 text-lg font-light mb-8">Коротко отвечаем на вопросы, которые чаще всего возникают перед запуском проекта.</p><a href="#contact" class="bg-white text-dark px-8 py-4 text-xs font-bold uppercase tracking-[0.15em] inline-block hover:bg-gold transition">Задать свой вопрос</a></div>
+          <div class="space-y-4">
+            <details class="glass-panel group" open><summary class="p-6 md:p-8 cursor-pointer flex justify-between items-center text-lg md:text-xl font-medium text-white hover:text-gold transition"><span class="flex items-center gap-4"><span class="text-gold font-serif italic text-sm">01</span> Подписываете ли вы NDA?</span><span class="text-gold text-2xl group-open:rotate-45 transition-transform">+</span></summary><div class="px-6 md:px-8 pb-8 text-white/50 font-light pl-[3.5rem]">Да. При необходимости фиксируем конфиденциальность документально ещё до старта обсуждения проекта.</div></details>
+            <details class="glass-panel group"><summary class="p-6 md:p-8 cursor-pointer flex justify-between items-center text-lg md:text-xl font-medium text-white hover:text-gold transition"><span class="flex items-center gap-4"><span class="text-gold font-serif italic text-sm">02</span> Публикуете ли вы материалы?</span><span class="text-gold text-2xl group-open:rotate-45 transition-transform">+</span></summary><div class="px-6 md:px-8 pb-8 text-white/50 font-light pl-[3.5rem]">Нет, без отдельного согласования мы не публикуем фото, видео и детали проекта ни в каком виде.</div></details>
+            <details class="glass-panel group"><summary class="p-6 md:p-8 cursor-pointer flex justify-between items-center text-lg md:text-xl font-medium text-white hover:text-gold transition"><span class="flex items-center gap-4"><span class="text-gold font-serif italic text-sm">03</span> Как контролируется фото и видео?</span><span class="text-gold text-2xl group-open:rotate-45 transition-transform">+</span></summary><div class="px-6 md:px-8 pb-8 text-white/50 font-light pl-[3.5rem]">Согласуем правила съёмки заранее, определяем жесткий доступ к материалам и контролируем публикации.</div></details>
+            <details class="glass-panel group"><summary class="p-6 md:p-8 cursor-pointer flex justify-between items-center text-lg md:text-xl font-medium text-white hover:text-gold transition"><span class="flex items-center gap-4"><span class="text-gold font-serif italic text-sm">04</span> Можно ли провести событие без публичности?</span><span class="text-gold text-2xl group-open:rotate-45 transition-transform">+</span></summary><div class="px-6 md:px-8 pb-8 text-white/50 font-light pl-[3.5rem]">Да. Мы выстраиваем процесс так, чтобы мероприятие оставалось закрытым на всех 100% этапах.</div></details>
+            <details class="glass-panel group"><summary class="p-6 md:p-8 cursor-pointer flex justify-between items-center text-lg md:text-xl font-medium text-white hover:text-gold transition"><span class="flex items-center gap-4"><span class="text-gold font-serif italic text-sm">05</span> Работаете ли вы с VIP-гостями?</span><span class="text-gold text-2xl group-open:rotate-45 transition-transform">+</span></summary><div class="px-6 md:px-8 pb-8 text-white/50 font-light pl-[3.5rem]">Да. Организуем деликатное сопровождение, доступ по спискам и жесткий контроль чувствительных зон.</div></details>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="relative py-32 bg-dark-light border-y border-white/5 overflow-hidden">
+      <img src="/07-contact-background.png" class="absolute inset-0 w-full h-full object-cover opacity-[0.08]" alt="Фон" />
+      <div class="relative z-10 max-w-[1440px] mx-auto px-6 lg:px-8">
+        <div class="grid lg:grid-cols-2 gap-16 items-start">
+          <div>
+            <div class="flex items-center gap-3 mb-4 text-gold text-[10px] uppercase tracking-[0.2em] font-semibold"><div class="w-2 h-2 rounded-full bg-gold"></div> CTA</div>
+            <h2 class="text-4xl md:text-6xl font-light uppercase tracking-tight mb-8">Обсудим ваше <br />мероприятие</h2>
+            <p class="text-white/60 text-xl font-light mb-12">Предложим формат, тайминг и безопасную организацию под вашу задачу.</p>
+            <div class="space-y-6 text-xl tracking-wide font-light"><a href="tel:+79991234567" class="block hover:text-gold transition">+7 (999) 123-45-67</a><a href="mailto:events@brosco.studio" class="block hover:text-gold transition">events@brosco.studio</a><p class="text-white/40 text-sm mt-4">Москва, Россия</p></div>
+          </div>
+
+          <div class="glass-panel p-8 md:p-12">
+            <form on:submit|preventDefault={() => alert('Конфиденциальный запрос отправлен.')}>
+              <div class="grid gap-6 mb-8">
+                <input type="text" placeholder="Ваше имя" class="w-full bg-[#111] border border-white/10 px-6 py-5 text-white outline-none focus:border-gold transition placeholder:text-white/30" required />
+                <input type="text" placeholder="Телефон или Telegram" class="w-full bg-[#111] border border-white/10 px-6 py-5 text-white outline-none focus:border-gold transition placeholder:text-white/30" required />
+                <textarea rows="4" placeholder="Кратко о задаче" class="w-full bg-[#111] border border-white/10 px-6 py-5 text-white outline-none focus:border-gold transition placeholder:text-white/30 resize-none"></textarea>
+              </div>
+              <button class="w-full bg-white text-dark py-5 text-xs font-bold uppercase tracking-[0.15em] hover:bg-gold transition">Получить предложение</button>
+              <p class="text-center text-white/30 text-xs mt-6 italic">Первый контакт — полностью конфиденциальный</p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="py-16 bg-dark">
+    <div class="max-w-[1440px] mx-auto px-6 lg:px-8">
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+        <div class="lg:col-span-1"><div class="text-xl font-medium tracking-tight mb-6">BROSCO PRIVATE EVENTS</div><p class="text-white/40 text-sm leading-relaxed mb-6">Организуем закрытые мероприятия под ключ. Конфиденциальность, точность и деликатное сопровождение.</p></div>
+        <div><h4 class="text-gold text-[10px] uppercase tracking-widest font-semibold mb-6">Навигация</h4><ul class="space-y-4 text-white/60 text-sm"><li><a href="#hero" class="hover:text-white transition">Главная</a></li><li><a href="#services" class="hover:text-white transition">Форматы</a></li><li><a href="#cases" class="hover:text-white transition">Кейсы</a></li><li><a href="#approach" class="hover:text-white transition">Подход</a></li><li><a href="#faq" class="hover:text-white transition">FAQ</a></li></ul></div>
+        <div><h4 class="text-gold text-[10px] uppercase tracking-widest font-semibold mb-6">Форматы</h4><ul class="space-y-4 text-white/60 text-sm"><li>Корпоративные события</li><li>Частные мероприятия</li><li>VIP / Closed Events</li><li>Под ключ</li></ul></div>
+        <div><h4 class="text-gold text-[10px] uppercase tracking-widest font-semibold mb-6">Контакты</h4><ul class="space-y-4 text-white/60 text-sm"><li>+7 (999) 123-45-67</li><li>events@brosco.studio</li><li>Москва, Россия</li></ul></div>
+      </div>
+      <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-white/30"><div>© 2026 BROSCO Private Events. Все права защищены.</div><div class="flex gap-6"><a href="/privacy" class="hover:text-white transition">Политика конфиденциальности</a><a href="/data-processing" class="hover:text-white transition">Обработка данных</a></div></div>
     </div>
-  </section>
-
-  <section class="py-16 sm:py-20 bg-gold text-black"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 text-center"><div><div class="text-4xl font-serif font-bold mb-2 counter-value" data-target="50" data-suffix="+">0</div><div class="text-xs uppercase tracking-[0.2em] opacity-70">Мероприятий</div></div><div><div class="text-4xl font-serif font-bold mb-2 counter-value" data-target="7" data-suffix="+">0</div><div class="text-xs uppercase tracking-[0.2em] opacity-70">Лет опыта</div></div><div><div class="text-4xl font-serif font-bold mb-2">100%</div><div class="text-xs uppercase tracking-[0.2em] opacity-70">NDA проектов</div></div><div><div class="text-4xl font-serif font-bold mb-2 counter-value" data-target="20" data-suffix="+">0</div><div class="text-xs uppercase tracking-[0.2em] opacity-70">Городов</div></div><div class="col-span-2 sm:col-span-1"><div class="text-4xl font-serif font-bold mb-2 counter-value" data-target="85" data-suffix="%">0</div><div class="text-xs uppercase tracking-[0.2em] opacity-70">Повторных клиентов</div></div></div></div></section>
-
-  <section id="faq" class="py-20 sm:py-24 lg:py-28 bg-charcoal border-t border-white/5"><div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8"><h2 class="font-serif text-3xl sm:text-4xl text-center text-white mb-10 sm:mb-14 reveal">Важное перед стартом</h2><div class="space-y-4 reveal"><details class="group bg-slate border border-white/5"><summary class="flex justify-between items-center font-medium cursor-pointer list-none p-6 text-white">Подписываете ли вы NDA?<i data-lucide="chevron-down" class="w-5 h-5 text-gold"></i></summary><div class="px-6 pb-6 text-sm text-gray-400 border-t border-white/5 pt-4">Да, это стандарт нашей работы.</div></details></div></div></section>
-
-  <section id="contact" class="py-20 sm:py-24 lg:py-28 bg-dark relative overflow-hidden"><img src="/07-contact-background.png" alt="contact background" class="absolute inset-0 w-full h-full object-cover opacity-[0.08]" /><div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10"><div class="glass-panel p-6 sm:p-8 md:p-12 reveal"><div class="text-center mb-8 sm:mb-10"><h2 class="font-serif text-3xl sm:text-4xl text-white mb-3 sm:mb-4">Обсудим ваше мероприятие</h2><p class="text-gray-400 text-sm sm:text-base">Оставьте заявку.</p></div><form bind:this={contactForm} id="contact-form" class="space-y-6" novalidate><div class="grid grid-cols-1 sm:grid-cols-2 gap-6"><div class="space-y-2"><label for="name" class="text-xs uppercase tracking-[0.2em] text-gray-500 font-medium">Имя <span class="text-gold">*</span></label><input type="text" id="name" required class="form-input w-full bg-black/40 border border-white/10 p-4 text-white text-sm" /><p class="error-message text-red-400 text-[11px] hidden">Введите ваше имя</p></div><div class="space-y-2"><label for="contact-info" class="text-xs uppercase tracking-[0.2em] text-gray-500 font-medium">Телефон / Telegram <span class="text-gold">*</span></label><input type="text" id="contact-info" required class="form-input w-full bg-black/40 border border-white/10 p-4 text-white text-sm" /><p class="error-message text-red-400 text-[11px] hidden">Укажите способ связи</p></div></div><button bind:this={submitBtn} type="submit" id="submit-btn" class="w-full bg-gold text-black font-medium uppercase tracking-[0.2em] text-sm py-4 flex items-center justify-center gap-2"><span bind:this={btnText} class="btn-text">Отправить запрос</span><span bind:this={btnLoading} class="btn-loading hidden"><svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle></svg></span></button></form><div bind:this={formSuccess} id="form-success" class="hidden text-center py-8"><i data-lucide="check-circle" class="w-8 h-8 text-gold mx-auto mb-4"></i><h3 class="font-serif text-2xl text-white mb-3">Заявка отправлена</h3></div></div></div></section>
-</main>
+  </footer>
+</div>
 
 <style>
-  :global(*){box-sizing:border-box;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
-  :global(html){scroll-behavior:smooth;scroll-padding-top:80px}
-  :global(body){margin:0;background:#0a0a0a;color:#e5e5e5;overflow-x:hidden}
-  .text-gold{color:#d4af37}.bg-dark{background:#0a0a0a}.bg-charcoal{background:#121212}.bg-slate{background:#1c1c1c}.bg-gold{background:#d4af37}
-  .font-serif{font-family:"Cormorant Garamond",Georgia,serif}.font-sans{font-family:"Manrope",-apple-system,sans-serif}
-  .reveal{opacity:0;transform:translateY(24px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}
-   :global(.reveal.is-visible){opacity:1;transform:translateY(0)}
-  .mobile-menu{transform:translateX(100%);transition:transform .4s cubic-bezier(.16,1,.3,1)}.mobile-menu.open{transform:translateX(0)}
-  .nav-line{transition:all .3s}.line-1-open{transform:rotate(45deg) translate(5px,5px)}.line-2-open{opacity:0}.line-3-open{transform:rotate(-45deg) translate(7px,-6px)}
-   :global(.bg-dark-nav){background:rgba(10,10,10,.95);backdrop-filter:blur(12px);box-shadow:0 10px 20px rgba(0,0,0,.2)}
-   :global(.h-20){height:5rem} :global(.h-16){height:4rem}
-  .glass-panel{background:rgba(28,28,28,.65);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.06)}
-  .form-input:focus{outline:1px solid rgba(212,175,55,.4);border-color:#d4af37}
-  .focus-link:focus{position:fixed;top:1rem;left:1rem;z-index:100;background:#d4af37;color:#000;padding:.5rem 1rem}
+  :global(html) { scroll-behavior: smooth; }
+  :global(body) { background-color: #0A0A0A; color: #ffffff; }
+  .glass-panel { background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01)); border: 1px solid rgba(255, 255, 255, 0.05); transition: all 0.4s ease; }
+  .glass-panel:hover { border-color: rgba(201, 169, 97, 0.3); transform: translateY(-4px); }
+  .hero-overlay { background: linear-gradient(180deg, rgba(10, 10, 10, 0.7) 0%, rgba(10, 10, 10, 0.5) 40%, rgba(10, 10, 10, 1) 100%); }
+  .image-hover-color img { filter: grayscale(100%) brightness(0.6); transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
+  .image-hover-color:hover img { filter: grayscale(0%) brightness(0.9); transform: scale(1.05); }
+  details > summary { list-style: none; }
+  details > summary::-webkit-details-marker { display: none; }
 </style>
