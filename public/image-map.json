@@ -1,9 +1,0 @@
-[
-  {"slot":"Hero Background","file":"01-hero-background.png","usage":"Первый экран / главный баннер"},
-  {"slot":"Corporate Format","file":"02-corporate-format.png","usage":"Карточка Corporate Worlds"},
-  {"slot":"Private Format","file":"03-private-format.png","usage":"Карточка Private Realms"},
-  {"slot":"Production Format","file":"04-production-format.png","usage":"Карточка High-End Production"},
-  {"slot":"Case Archive 1","file":"05-case-archive-1.png","usage":"Первый кейс The Vault / Closed Gala"},
-  {"slot":"Case Archive 2","file":"06-case-archive-2.png","usage":"Второй кейс The Vault / Strategy Summit"},
-  {"slot":"Contact Background","file":"07-contact-background.png","usage":"Фон контактного блока / финальный CTA"}
-]
